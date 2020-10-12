@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:background="@drawable/simple_message_background"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/simple_message_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:text="Title"
+        android:textStyle="bold"
+        tools:text="Title" />
+
+
+    <TextView
+        android:id="@+id/simple_message_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:text="This is a test description"
+        tools:text="This is a test description" />
+</LinearLayout>

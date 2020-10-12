@@ -1,0 +1,3 @@
+include ':spotlight'
+include ':app'
+rootProject.name = "SpotlightAndroid"

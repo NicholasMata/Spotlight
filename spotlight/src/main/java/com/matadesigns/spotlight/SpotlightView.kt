@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
+import android.text.Spannable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -17,6 +18,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import com.matadesigns.spotlight.abstraction.*
@@ -106,22 +108,24 @@ open class SpotlightView @JvmOverloads constructor(
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
-        _thisRect.set(
-            paddingLeft,
-            paddingTop,
-            width - paddingRight,
-            height - paddingBottom
-        )
-        layoutViews()
+        if (changed) {
+            _thisRect.set(
+                left,
+                top,
+                right,
+                bottom
+            )
+            layoutViews()
+        }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         _thisRect.set(
-            paddingLeft,
-            paddingTop,
-            width - paddingRight,
-            height - paddingBottom
+            _thisRect.left,
+            _thisRect.top,
+            _thisRect.left + w,
+            _thisRect.top + h
         )
         postInvalidate()
     }
@@ -186,10 +190,22 @@ open class SpotlightView @JvmOverloads constructor(
     protected fun layoutViews() {
         setTargetViewPosition()
         val messageGravity =
-            this.messageGravity ?: layoutManager.gravityFor(_targetRect, messageView, this)
+            this.messageGravity ?: layoutManager.gravityFor(
+                _targetRect,
+                messageView,
+                _thisRect,
+                this
+            )
         (indicatorView as? SpotlightIndicator)?.spotlightGravity = messageGravity
         (indicatorView as? SpotlightMessage)?.spotlightGravity = messageGravity
-        layoutManager.layoutViews(messageGravity, _targetRect, indicatorView, messageView, this)
+        layoutManager.layoutViews(
+            messageGravity,
+            _targetRect,
+            indicatorView,
+            messageView,
+            _thisRect,
+            this
+        )
     }
 
     override fun performClick(): Boolean {
@@ -236,5 +252,19 @@ open class SpotlightView @JvmOverloads constructor(
         val w = view.width
         val h = view.height
         return !(rx < x || rx > x + w || ry < y || ry > y + h)
+    }
+
+    public fun setTitle(text: CharSequence) {
+        val titleView = messageView.findViewById<View>(R.id.spotlight_title)
+        if (titleView is TextView) {
+            titleView.text = text
+        }
+    }
+
+    public fun setDescription(text: CharSequence) {
+        val descriptionView = messageView.findViewById<View>(R.id.spotlight_description)
+        if (descriptionView is TextView) {
+            descriptionView.text = text
+        }
     }
 }

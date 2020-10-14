@@ -8,12 +8,19 @@ import com.matadesigns.spotlight.SpotlightView
 import com.matadesigns.spotlight.config.SpotlightMessageGravity
 
 interface SpotlightLayoutManager {
-    fun gravityFor(targetRect: Rect, message: View, root: SpotlightView): SpotlightMessageGravity
+    fun gravityFor(
+        targetRect: Rect,
+        message: View,
+        parentRect: Rect,
+        root: SpotlightView
+    ): SpotlightMessageGravity
+
     fun layoutViews(
         messageGravity: SpotlightMessageGravity,
         targetRect: Rect,
         indicator: View,
         message: View,
+        parentRect: Rect,
         root: SpotlightView
     )
 }

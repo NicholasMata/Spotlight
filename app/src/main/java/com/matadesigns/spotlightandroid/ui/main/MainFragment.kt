@@ -39,30 +39,57 @@ class MainFragment : Fragment() {
         val topRight = requireView().findViewById<View>(R.id.message_top_right)
 
         val leftContainer = requireView().findViewById<View>(R.id.left_container)
+        val rightContainer = requireView().findViewById<View>(R.id.right_container)
 
         builder = SpotlightBuilder(requireContext())
             .setTargetView(center)
             .setInset(20)
+            .setTitle("Center")
+            .setDescription("This is the center text")
             .setListener(object : SpotlightListener {
-                override fun onEnd(targetView: View?) {
+                    override fun onEnd(targetView: View?) {
                     when (targetView) {
                         center -> {
-                            builder.setTargetView(bottomRight)
+                            builder
+                                .setTitle("Bottom Right")
+                                .setDescription("This is the bottom right text")
+                                .setTargetView(bottomRight)
                         }
                         bottomRight -> {
-                            builder.setTargetView(bottomLeft)
+                            builder
+                                .setTitle("Bottom Left")
+                                .setDescription("This is the bottom left text")
+                                .setTargetView(bottomLeft)
                         }
                         bottomLeft -> {
-                            builder.setTargetView(topLeft)
+                            builder
+                                .setTitle("Top Left")
+                                .setDescription("This is the top left text")
+                                .setTargetView(topLeft)
                         }
                         topLeft -> {
-                            builder.setTargetView(topRight)
+                            builder
+                                .setTitle("Top Right")
+                                .setDescription("This is the top right text")
+                                .setTargetView(topRight)
                         }
                         topRight -> {
-                            builder.setTargetView(leftContainer)
+                            builder
+                                .setTitle("Left Container")
+                                .setDescription("This is the a large left view")
+                                .setTargetView(leftContainer)
                         }
                         leftContainer -> {
-                            builder.setTargetView(center)
+                            builder
+                                .setTitle("Right Container")
+                                .setDescription("This is the a large right view")
+                                .setTargetView(rightContainer)
+                        }
+                        rightContainer -> {
+                            builder
+                                .setTitle("Center")
+                                .setDescription("This is the center text")
+                                .setTargetView(center)
                         }
                     }
                     builder.build().startSpotlight()

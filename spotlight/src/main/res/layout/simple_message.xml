@@ -9,20 +9,20 @@
     android:padding="10dp">
 
     <TextView
-        android:id="@+id/simple_message_title"
+        android:id="@id/spotlight_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="18sp"
-        android:text="Title"
+        android:textAlignment="center"
         android:textStyle="bold"
         tools:text="Title" />
 
 
     <TextView
-        android:id="@+id/simple_message_description"
+        android:id="@id/spotlight_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="16sp"
-        android:text="This is a test description"
+        android:textAlignment="center"
         tools:text="This is a test description" />
 </LinearLayout>

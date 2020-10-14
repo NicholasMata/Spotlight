@@ -1,14 +1,16 @@
 package com.matadesigns.spotlight.layoutmanager
 
-import android.content.res.Resources
-import android.graphics.Point
 import android.graphics.Rect
 import android.util.Log
+import android.util.Size
 import android.view.View
+import android.view.View.MeasureSpec
+import android.view.ViewGroup
+import android.widget.LinearLayout
 import com.matadesigns.spotlight.SpotlightView
 import com.matadesigns.spotlight.abstraction.SpotlightLayoutManager
 import com.matadesigns.spotlight.config.SpotlightMessageGravity
-import java.util.*
+
 
 class DefaultLayoutManager : SpotlightLayoutManager {
 
@@ -19,27 +21,68 @@ class DefaultLayoutManager : SpotlightLayoutManager {
     class IndicatorLayoutInfo(
         var marginStart: Int,
         var marginEnd: Int,
-        var maxLength: Int
+        var maxLength: Int,
+        var minLength: Int
     ) {
-
-        val totalLength: Int
-            get() {
-                return marginStart + maxLength + marginEnd
-            }
-
         companion object {
-            var default = IndicatorLayoutInfo(10, 0, 40)
+            var default = IndicatorLayoutInfo(
+                10,
+                0,
+                40,
+                20
+            )
         }
     }
 
+    class MessageLayoutInfo(
+        var resizable: Boolean
+    ) {
+        companion object {
+            var default = MessageLayoutInfo(true)
+        }
+    }
+
+    var messageLayoutInfo: MessageLayoutInfo = MessageLayoutInfo.default
     var indicatorLayoutInfo: IndicatorLayoutInfo = IndicatorLayoutInfo.default
 
-    fun distanceBetween(view: View, rect: Rect, messageGravity: SpotlightMessageGravity): Int {
+    fun distanceBetween(
+        view: View,
+        parent: Rect,
+        rect: Rect,
+        messageGravity: SpotlightMessageGravity
+    ): Int {
+        val availableArea = availableRect(view, parent, rect, messageGravity)
+        return when(messageGravity) {
+            SpotlightMessageGravity.right, SpotlightMessageGravity.left -> availableArea.width
+            SpotlightMessageGravity.top, SpotlightMessageGravity.bottom -> availableArea.height
+        }
+    }
+
+    fun availableRect(
+        view: View,
+        parent: Rect,
+        rect: Rect,
+        messageGravity: SpotlightMessageGravity
+    ): Size {
+        val heightMinusNavigation = parent.bottom - getNavigationBarSize(view)
+        val width = parent.width()
         return when (messageGravity) {
-            SpotlightMessageGravity.bottom -> (view.bottom - getNavigationBarSize(view)) - rect.bottom
-            SpotlightMessageGravity.left -> rect.left - view.left
-            SpotlightMessageGravity.right -> view.right - rect.right
-            SpotlightMessageGravity.top -> rect.top - view.top
+            SpotlightMessageGravity.bottom -> Size(
+                width,
+                heightMinusNavigation - rect.bottom
+            )
+            SpotlightMessageGravity.left -> Size(
+                rect.left - parent.left,
+                heightMinusNavigation
+            )
+            SpotlightMessageGravity.right -> Size(
+                parent.right - rect.right,
+                heightMinusNavigation
+            )
+            SpotlightMessageGravity.top -> Size(
+                width,
+                rect.top - parent.top
+            )
         }
     }
 
@@ -54,11 +97,17 @@ class DefaultLayoutManager : SpotlightLayoutManager {
     override fun gravityFor(
         targetRect: Rect,
         message: View,
+        parentRect: Rect,
         root: SpotlightView
     ): SpotlightMessageGravity {
         val distancesMap = SpotlightMessageGravity.values()
             .fold(mutableMapOf<SpotlightMessageGravity, Int>(), { acc, spotlightMessageGravity ->
-                val distance = distanceBetween(root, targetRect, spotlightMessageGravity)
+                val distance = distanceBetween(
+                    root,
+                    parentRect,
+                    targetRect,
+                    spotlightMessageGravity
+                )
                 acc.put(spotlightMessageGravity, distance)
                 acc
             })
@@ -76,21 +125,61 @@ class DefaultLayoutManager : SpotlightLayoutManager {
         targetRect: Rect,
         indicator: View,
         message: View,
+        parentRect: Rect,
         root: SpotlightView
     ) {
         val rootRect = Rect(
-            root.left + root.insetLeft,
-            root.top + root.insetTop,
-            root.right - root.insetRight,
-            root.bottom - root.insetBottom
+            parentRect.left + root.insetLeft,
+            parentRect.top + root.insetTop,
+            parentRect.right - root.insetRight,
+            parentRect.bottom - root.insetBottom
         )
 
+        if (rootRect.width() == 0 && rootRect.height() == 0) return
+
         val density = root.context.resources.displayMetrics.density
-        val totalDistanceAvailable = distanceBetween(root, targetRect, messageGravity)
+        val totalDistanceAvailable = distanceBetween(root, rootRect, targetRect, messageGravity)
 
-        val messageHeight = message.height
-        val messageWidth = message.width
 
+        val marginStart = (indicatorLayoutInfo.marginStart * density).toInt()
+        val marginEnd = (indicatorLayoutInfo.marginEnd * density).toInt()
+        val minIndicatorLength = (indicatorLayoutInfo.minLength * density).toInt()
+
+        val originalMessageHeight = message.height
+        val originalMessageWidth = message.width
+
+        val messageHeight: Int
+        val messageWidth: Int
+
+        if (messageLayoutInfo.resizable) {
+            val totalAreaAvailable = availableRect(root, rootRect, targetRect, messageGravity)
+            val fullMinIndicatorLength = minIndicatorLength + marginStart + marginEnd
+            var width = totalAreaAvailable.width
+            var height = totalAreaAvailable.height
+            when (messageGravity) {
+                SpotlightMessageGravity.bottom, SpotlightMessageGravity.top -> {
+                    height -= fullMinIndicatorLength
+                }
+                SpotlightMessageGravity.left, SpotlightMessageGravity.right -> {
+                    width -= fullMinIndicatorLength
+                }
+            }
+            val widthMeasureSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST)
+            val heightMeasureSpec =
+                MeasureSpec.makeMeasureSpec(totalAreaAvailable.height, MeasureSpec.AT_MOST)
+            message.measure(widthMeasureSpec, heightMeasureSpec)
+            messageWidth = message.measuredWidth
+            messageHeight = message.measuredHeight
+            if (originalMessageHeight != messageHeight && originalMessageWidth != messageWidth) {
+                val layoutParams = message.layoutParams
+                layoutParams.width = messageWidth
+                layoutParams.height = messageHeight
+                message.layoutParams = layoutParams
+            }
+        } else {
+            messageHeight = originalMessageHeight
+            messageWidth = originalMessageWidth
+        }
 
         if (totalDistanceAvailable < messageWidth) {
             Log.w(
@@ -98,9 +187,6 @@ class DefaultLayoutManager : SpotlightLayoutManager {
                 "Message will not fit on ${messageGravity.name} either make a custom SpotlightLayoutManager or don't set messageGravity manually if you do."
             )
         }
-
-        val marginStart = (indicatorLayoutInfo.marginStart * density).toInt()
-        val marginEnd = (indicatorLayoutInfo.marginEnd * density).toInt()
 
         val distanceAvailableIfMargins = totalDistanceAvailable - (marginStart + marginEnd)
 

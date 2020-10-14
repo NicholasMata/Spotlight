@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="spotlight_title" type="id" />
+    <item name="spotlight_description" type="id" />
+</resources>

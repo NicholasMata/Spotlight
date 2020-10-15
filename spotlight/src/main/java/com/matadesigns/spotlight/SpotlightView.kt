@@ -46,9 +46,25 @@ open class SpotlightView @JvmOverloads constructor(
 
     @LayoutRes
     public var indicatorLayout: Int = R.layout.simple_indicator
+        set(value) {
+            if (field != value) {
+                field = value
+                removeView(indicatorView)
+                val inflater = LayoutInflater.from(context)
+                indicatorView = inflater.inflate(value, this, false)
+            }
+        }
 
     @LayoutRes
     public var messageLayout: Int = R.layout.simple_message
+        set(value) {
+            if (field != value) {
+                field = value
+                removeView(messageView)
+                val inflater = LayoutInflater.from(context)
+                messageView = inflater.inflate(value, this, false)
+            }
+        }
 
     public var styler: SpotlightStyler = SimpleStyler()
         set(value) {

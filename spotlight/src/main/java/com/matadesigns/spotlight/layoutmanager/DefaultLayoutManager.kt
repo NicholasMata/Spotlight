@@ -52,7 +52,7 @@ class DefaultLayoutManager : SpotlightLayoutManager {
         messageGravity: SpotlightMessageGravity
     ): Int {
         val availableArea = availableRect(view, parent, rect, messageGravity)
-        return when(messageGravity) {
+        return when (messageGravity) {
             SpotlightMessageGravity.right, SpotlightMessageGravity.left -> availableArea.width
             SpotlightMessageGravity.top, SpotlightMessageGravity.bottom -> availableArea.height
         }
@@ -135,7 +135,7 @@ class DefaultLayoutManager : SpotlightLayoutManager {
             parentRect.bottom - root.insetBottom
         )
 
-        if (rootRect.width() == 0 && rootRect.height() == 0) return
+        if (rootRect.width() <= 0 && rootRect.height() <= 0) return
 
         val density = root.context.resources.displayMetrics.density
         val totalDistanceAvailable = distanceBetween(root, rootRect, targetRect, messageGravity)
@@ -165,8 +165,7 @@ class DefaultLayoutManager : SpotlightLayoutManager {
                 }
             }
             val widthMeasureSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST)
-            val heightMeasureSpec =
-                MeasureSpec.makeMeasureSpec(totalAreaAvailable.height, MeasureSpec.AT_MOST)
+            val heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.AT_MOST)
             message.measure(widthMeasureSpec, heightMeasureSpec)
             messageWidth = message.measuredWidth
             messageHeight = message.measuredHeight
@@ -175,6 +174,7 @@ class DefaultLayoutManager : SpotlightLayoutManager {
                 layoutParams.width = messageWidth
                 layoutParams.height = messageHeight
                 message.layoutParams = layoutParams
+                return
             }
         } else {
             messageHeight = originalMessageHeight

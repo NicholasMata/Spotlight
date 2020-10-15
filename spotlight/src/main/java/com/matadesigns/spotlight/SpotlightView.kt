@@ -124,15 +124,13 @@ open class SpotlightView @JvmOverloads constructor(
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
-        if (changed) {
-            _thisRect.set(
-                left,
-                top,
-                right,
-                bottom
-            )
-            layoutViews()
-        }
+        _thisRect.set(
+            left,
+            top,
+            right,
+            bottom
+        )
+        layoutViews()
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {

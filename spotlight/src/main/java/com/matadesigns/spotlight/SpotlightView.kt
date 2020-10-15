@@ -20,6 +20,7 @@ import android.view.animation.Animation
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.LayoutRes
+import androidx.core.graphics.toRect
 import androidx.fragment.app.Fragment
 import com.matadesigns.spotlight.abstraction.*
 import com.matadesigns.spotlight.config.SpotlightDismissType
@@ -187,14 +188,19 @@ open class SpotlightView @JvmOverloads constructor(
     fun setTargetViewPosition() {
         val targetView = targetView
         if (targetView != null) {
-            val locationTarget = IntArray(2)
-            targetView.getLocationOnScreen(locationTarget)
-            _targetRect.set(
-                locationTarget[0],
-                locationTarget[1],
-                locationTarget[0] + targetView.width,
-                locationTarget[1] + targetView.height
-            )
+            if (targetView is SpotlightTarget) {
+                val boundingRect = targetView.boundingRect.toRect()
+                _targetRect.set(boundingRect)
+            } else {
+                val locationTarget = IntArray(2)
+                targetView.getLocationOnScreen(locationTarget)
+                _targetRect.set(
+                    locationTarget[0],
+                    locationTarget[1],
+                    locationTarget[0] + targetView.width,
+                    locationTarget[1] + targetView.height
+                )
+            }
             postInvalidate()
         } else {
             _targetRect.set(0, 0, 0, 0)
@@ -239,8 +245,15 @@ open class SpotlightView @JvmOverloads constructor(
                     }
                 }
                 SpotlightDismissType.targetView -> {
-                    if (viewContains(targetView, x, y)) {
-                        performClick()
+                    val targetView = targetView
+                    if(targetView is SpotlightTarget && targetView.handlesSpotlightTouchEvent) {
+                        if(targetView.onSpotlightTouchEvent(event)) {
+                            performClick()
+                        }
+                    } else {
+                        if (viewContains(targetView, x, y)) {
+                            performClick()
+                        }
                     }
                 }
                 SpotlightDismissType.messageView -> {

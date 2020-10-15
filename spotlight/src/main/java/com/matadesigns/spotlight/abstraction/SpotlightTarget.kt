@@ -2,8 +2,12 @@ package com.matadesigns.spotlight.abstraction
 
 import android.graphics.Path
 import android.graphics.RectF
+import android.view.MotionEvent
 
 interface SpotlightTarget {
-    var spotlightPath: Path
-    var boundingRect: RectF
+    val spotlightPath: Path
+    val boundingRect: RectF
+    val handlesSpotlightTouchEvent: Boolean
+
+    fun onSpotlightTouchEvent(event: MotionEvent): Boolean
 }

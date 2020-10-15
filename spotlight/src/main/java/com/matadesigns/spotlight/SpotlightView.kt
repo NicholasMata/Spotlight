@@ -66,7 +66,7 @@ open class SpotlightView @JvmOverloads constructor(
             }
         }
 
-    public var styler: SpotlightStyler = SimpleStyler()
+    public var styler: SpotlightStyler = SimpleStyler(context)
         set(value) {
             field = value
             postInvalidate()

@@ -4,8 +4,10 @@ import android.content.Context
 import android.view.View
 import androidx.annotation.LayoutRes
 import com.matadesigns.spotlight.abstraction.SpotlightListener
+import com.matadesigns.spotlight.abstraction.SpotlightStyler
 import com.matadesigns.spotlight.config.SpotlightDismissType
 import com.matadesigns.spotlight.config.SpotlightMessageGravity
+import com.matadesigns.spotlight.themes.simple.SimpleStyler
 
 open class SpotlightBuilder(private var context: Context) {
     private var _targetView: View? = null
@@ -20,6 +22,7 @@ open class SpotlightBuilder(private var context: Context) {
     private var _insetBottom: Int = 0
     private var _title: CharSequence = ""
     private var _description: CharSequence = ""
+    private var _styler: SpotlightStyler = SimpleStyler(context)
 
     fun setTitle(text: CharSequence): SpotlightBuilder {
         _title = text
@@ -28,6 +31,11 @@ open class SpotlightBuilder(private var context: Context) {
 
     fun setDescription(text: CharSequence): SpotlightBuilder {
         _description = text
+        return this
+    }
+
+    fun setStyler(styler: SpotlightStyler): SpotlightBuilder {
+        _styler = styler
         return this
     }
 
@@ -84,6 +92,7 @@ open class SpotlightBuilder(private var context: Context) {
             it.insetRight = this._insetRight
             it.setTitle(this._title)
             it.setDescription(this._description)
+            it.styler = _styler
         }
     }
 }

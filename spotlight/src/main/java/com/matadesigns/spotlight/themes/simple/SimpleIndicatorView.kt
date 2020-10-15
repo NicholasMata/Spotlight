@@ -8,7 +8,10 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.View
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import com.matadesigns.spotlight.abstraction.SpotlightAnimatable
 import com.matadesigns.spotlight.abstraction.SpotlightIndicator
 import com.matadesigns.spotlight.config.SpotlightMessageGravity
@@ -35,7 +38,7 @@ open class SimpleIndicatorView @JvmOverloads constructor(
             postInvalidate()
         }
 
-    public var outerDotColor = Color.WHITE
+    public var outerDotColor: Int = -1
         set(value) {
             field = value
             _outerDotPaint.setColor(value)
@@ -54,7 +57,7 @@ open class SimpleIndicatorView @JvmOverloads constructor(
             _linePaint.strokeWidth = value
             postInvalidate()
         }
-    public var lineColor = Color.WHITE
+    public var lineColor: Int = -1
         set(value) {
             field = value
             _linePaint.setColor(value)
@@ -72,6 +75,13 @@ open class SimpleIndicatorView @JvmOverloads constructor(
 
     init {
         clipToOutline = false
+
+        val typedValue = TypedValue()
+        context.theme.resolveAttribute(android.R.attr.colorBackground, typedValue, true)
+        val backgroundColor = typedValue.data
+        outerDotColor = backgroundColor
+        lineColor = backgroundColor
+
         _linePaint.style = Paint.Style.FILL
         _linePaint.color = lineColor
         _linePaint.strokeWidth = lineWidth

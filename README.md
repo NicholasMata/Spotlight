@@ -2,6 +2,8 @@
 
 [![](https://jitpack.io/v/nicholasmata/spotlight.svg)](https://jitpack.io/#nicholasmata/spotlight)
 [![Android 24 +](https://img.shields.io/badge/Android-24+-blue.svg)](https://developer.android.com/studio/releases/platforms#7.0)
+<p align="center">
+<img src="./screenshots/sample.gif" width="300">
 
 ## Overview
 A great way to add tutorials to your Android application. Simple to use and highly customizable.

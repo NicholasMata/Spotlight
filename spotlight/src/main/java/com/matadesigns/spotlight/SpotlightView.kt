@@ -21,6 +21,10 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.core.graphics.toRect
+import androidx.core.view.marginBottom
+import androidx.core.view.marginEnd
+import androidx.core.view.marginStart
+import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
 import com.matadesigns.spotlight.abstraction.*
 import com.matadesigns.spotlight.config.SpotlightDismissType
@@ -239,11 +243,13 @@ open class SpotlightView @JvmOverloads constructor(
                 _targetRect.set(boundingRect)
             } else {
                 val point = SpotlightMath.pointOnScreen(targetView)
+                val left = point.x
+                val top = point.y
                 _targetRect.set(
-                    point.x,
-                    point.y,
-                    point.x + targetView.width,
-                    point.y + targetView.height
+                    left,
+                    top,
+                    left + targetView.width,
+                    top + targetView.height
                 )
             }
             postInvalidate()
@@ -286,11 +292,7 @@ open class SpotlightView @JvmOverloads constructor(
         if (dismissType == SpotlightDismissType.targetView &&
             targetView is SpotlightTarget && targetView.handlesSpotlightTouchEvent
         ) {
-            val result = targetView.onSpotlightTouchEvent(event)
-            if (result) {
-                performClick()
-            }
-            return result
+            return targetView.onSpotlightTouchEvent(event)
         }
         if (event.action == ACTION_DOWN) {
             when (dismissType) {

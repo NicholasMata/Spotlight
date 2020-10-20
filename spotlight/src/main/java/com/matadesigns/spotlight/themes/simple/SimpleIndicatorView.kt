@@ -98,10 +98,12 @@ open class SimpleIndicatorView @JvmOverloads constructor(
         _innerDotPaint.isAntiAlias = true
     }
 
-//    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-//        super.onSizeChanged(w, h, oldw, oldh)
-//
-//    }
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        val start = getLineStart()
+        _start.set(start)
+        _end.set(start)
+    }
 
     override fun startAnimation() {
         val start = getLineStart()

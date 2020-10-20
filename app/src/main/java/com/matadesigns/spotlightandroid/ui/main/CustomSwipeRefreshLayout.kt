@@ -34,6 +34,6 @@ class CustomSwipeRefreshLayout: SwipeRefreshLayout, SpotlightTarget {
     override val handlesSpotlightTouchEvent: Boolean = true
 
     override fun onSpotlightTouchEvent(event: MotionEvent): Boolean {
-        return false
+        return !boundingRect.contains(event.x, event.y)
     }
 }

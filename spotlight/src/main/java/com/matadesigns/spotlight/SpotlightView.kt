@@ -1,11 +1,12 @@
 package com.matadesigns.spotlight
 
+import android.animation.LayoutTransition
 import android.app.Activity
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
-import android.text.Spannable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -14,7 +15,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.FrameLayout
@@ -27,6 +27,7 @@ import com.matadesigns.spotlight.config.SpotlightDismissType
 import com.matadesigns.spotlight.config.SpotlightMessageGravity
 import com.matadesigns.spotlight.layoutmanager.DefaultLayoutManager
 import com.matadesigns.spotlight.themes.simple.SimpleStyler
+import com.matadesigns.spotlight.utils.SpotlightMath
 
 open class SpotlightView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -40,49 +41,75 @@ open class SpotlightView @JvmOverloads constructor(
     protected var messageView: View
     protected var indicatorView: View
 
-    public var insetTop: Int = 0
-    public var insetBottom: Int = 0
-    public var insetLeft: Int = 0
-    public var insetRight: Int = 0
+    var insetTop: Int = 0
+    var insetBottom: Int = 0
+    var insetLeft: Int = 0
+    var insetRight: Int = 0
+
+    var title: CharSequence? = null
+        get() {
+            return field
+        }
+        set(value) {
+            field = value
+            applyTitle(value)
+        }
+
+    var description: CharSequence? = null
+        get() {
+            return field
+        }
+        set(value) {
+            field = value
+            applyDescription(value)
+        }
+
 
     @LayoutRes
-    public var indicatorLayout: Int = R.layout.simple_indicator
+    var indicatorLayout: Int = R.layout.simple_indicator
         set(value) {
             if (field != value) {
                 field = value
                 removeView(indicatorView)
                 val inflater = LayoutInflater.from(context)
                 indicatorView = inflater.inflate(value, this, false)
+                addView(indicatorView, LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
             }
         }
 
     @LayoutRes
-    public var messageLayout: Int = R.layout.simple_message
+    var messageLayout: Int = R.layout.simple_message
         set(value) {
             if (field != value) {
                 field = value
+                (messageView as? SpotlightMessage)?.spotlightView = this
                 removeView(messageView)
                 val inflater = LayoutInflater.from(context)
                 messageView = inflater.inflate(value, this, false)
+                applyTitle(title)
+                applyDescription(description)
+                addView(messageView, LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
+                (messageView as? SpotlightMessage)?.spotlightView = this
             }
         }
 
-    public var styler: SpotlightStyler = SimpleStyler(context)
+    var styler: SpotlightStyler = SimpleStyler(context)
         set(value) {
             field = value
             postInvalidate()
         }
 
-    public var layoutManager: SpotlightLayoutManager = DefaultLayoutManager()
-    public var messageGravity: SpotlightMessageGravity? = null
-    public var targetView: View? = null
+    var layoutManager: SpotlightLayoutManager = DefaultLayoutManager()
+    var messageGravity: SpotlightMessageGravity? = null
+    var targetView: View? = null
         set(value) {
             field = value
+            (value as? SpotlightTarget)?.spotlightView = this
         }
-    public var listener: SpotlightListener? = null
-    public var dismissType: SpotlightDismissType = SpotlightDismissType.targetView
-    public var startAnimation: Animation = AlphaAnimation(0.0f, 1.0f).also {
-        it.duration = 400;
+    var listener: SpotlightListener? = null
+    var dismissType: SpotlightDismissType = SpotlightDismissType.targetView
+    var startAnimation: Animation = AlphaAnimation(0.0f, 1.0f).also {
+        it.duration = 400
         it.fillAfter = true
     }
 
@@ -101,7 +128,11 @@ open class SpotlightView @JvmOverloads constructor(
         addView(indicatorView, LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
         addView(messageView, LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
 
-        layoutParams = LayoutParams(MATCH_PARENT, MATCH_PARENT)
+        layoutParams = LayoutParams(MATCH_PARENT, MATCH_PARENT).also {
+            if (context.resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE) {
+                it.bottomMargin = getNavigationBarSize(this)
+            }
+        }
 
         startAnimationListener = object : Animation.AnimationListener {
             override fun onAnimationStart(animation: Animation?) {}
@@ -114,6 +145,20 @@ open class SpotlightView @JvmOverloads constructor(
             override fun onAnimationRepeat(animation: Animation?) {}
         }
         startAnimation.setAnimationListener(startAnimationListener)
+    }
+
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+
+        layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+    }
+
+    private fun getNavigationBarSize(root: View): Int {
+        val resources = root.context.resources
+        val resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
+        return if (resourceId > 0) {
+            resources.getDimensionPixelSize(resourceId)
+        } else 0
     }
 
     fun setInset(size: Int) {
@@ -162,11 +207,10 @@ open class SpotlightView @JvmOverloads constructor(
         }
     }
 
-    public fun startSpotlight() {
+    fun startSpotlight() {
         layoutViews()
 
         isClickable = false
-
         val context = this.context
         when (context) {
             is Activity -> {
@@ -180,7 +224,9 @@ open class SpotlightView @JvmOverloads constructor(
         listener?.onStart(targetView)
     }
 
-    public fun endSpotlight() {
+    fun endSpotlight() {
+        (messageView as? SpotlightMessage)?.spotlightView = null
+        (targetView as? SpotlightTarget)?.spotlightView = null
         ((context as? Activity)?.window?.decorView as? ViewGroup)?.removeView(this)
         listener?.onEnd(targetView)
     }
@@ -192,13 +238,12 @@ open class SpotlightView @JvmOverloads constructor(
                 val boundingRect = targetView.boundingRect.toRect()
                 _targetRect.set(boundingRect)
             } else {
-                val locationTarget = IntArray(2)
-                targetView.getLocationOnScreen(locationTarget)
+                val point = SpotlightMath.pointOnScreen(targetView)
                 _targetRect.set(
-                    locationTarget[0],
-                    locationTarget[1],
-                    locationTarget[0] + targetView.width,
-                    locationTarget[1] + targetView.height
+                    point.x,
+                    point.y,
+                    point.x + targetView.width,
+                    point.y + targetView.height
                 )
             }
             postInvalidate()
@@ -234,9 +279,19 @@ open class SpotlightView @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if (event == null) return false;
+        if (event == null) return false
         val x = event.x
         val y = event.y
+        val targetView = targetView
+        if (dismissType == SpotlightDismissType.targetView &&
+            targetView is SpotlightTarget && targetView.handlesSpotlightTouchEvent
+        ) {
+            val result = targetView.onSpotlightTouchEvent(event)
+            if (result) {
+                performClick()
+            }
+            return result
+        }
         if (event.action == ACTION_DOWN) {
             when (dismissType) {
                 SpotlightDismissType.outside -> {
@@ -245,15 +300,8 @@ open class SpotlightView @JvmOverloads constructor(
                     }
                 }
                 SpotlightDismissType.targetView -> {
-                    val targetView = targetView
-                    if(targetView is SpotlightTarget && targetView.handlesSpotlightTouchEvent) {
-                        if(targetView.onSpotlightTouchEvent(event)) {
-                            performClick()
-                        }
-                    } else {
-                        if (viewContains(targetView, x, y)) {
-                            performClick()
-                        }
+                    if (viewContains(targetView, x, y)) {
+                        performClick()
                     }
                 }
                 SpotlightDismissType.messageView -> {
@@ -271,24 +319,21 @@ open class SpotlightView @JvmOverloads constructor(
     }
 
     private fun viewContains(view: View?, rx: Float, ry: Float): Boolean {
-        if (view == null) return false;
-        val location = IntArray(2)
-        view.getLocationOnScreen(location)
-        val x = location[0]
-        val y = location[1]
+        if (view == null) return false
+        val point = SpotlightMath.pointOnScreen(view)
         val w = view.width
         val h = view.height
-        return !(rx < x || rx > x + w || ry < y || ry > y + h)
+        return !(rx < point.x || rx > point.x + w || ry < point.y || ry > point.y + h)
     }
 
-    public fun setTitle(text: CharSequence) {
+    protected fun applyTitle(text: CharSequence?) {
         val titleView = messageView.findViewById<View>(R.id.spotlight_title)
         if (titleView is TextView) {
             titleView.text = text
         }
     }
 
-    public fun setDescription(text: CharSequence) {
+    protected fun applyDescription(text: CharSequence?) {
         val descriptionView = messageView.findViewById<View>(R.id.spotlight_description)
         if (descriptionView is TextView) {
             descriptionView.text = text

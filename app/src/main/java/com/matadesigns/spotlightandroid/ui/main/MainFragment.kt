@@ -2,15 +2,20 @@ package com.matadesigns.spotlightandroid.ui.main
 
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.HandlerCompat.postDelayed
 import androidx.lifecycle.ViewModelProvider
 import com.matadesigns.spotlight.SpotlightBuilder
 import com.matadesigns.spotlight.abstraction.SpotlightListener
+import com.matadesigns.spotlight.config.SpotlightDismissType
 import com.matadesigns.spotlight.config.SpotlightMessageGravity
 import com.matadesigns.spotlightandroid.R
+import kotlinx.android.synthetic.main.main_fragment.view.*
 
 class MainFragment : Fragment() {
 
@@ -26,6 +31,18 @@ class MainFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val root = inflater.inflate(R.layout.main_fragment, container, false)
+        val refreshLayout = root.left_container
+        refreshLayout.setOnRefreshListener {
+            val handler = Handler(Looper.getMainLooper())
+            handler.postDelayed({
+                val number: Int = root.left_container_text.text.toString().toInt()
+                root.left_container_text.text = (number + 1).toString()
+                refreshLayout.isRefreshing = false
+                handler.postDelayed({
+                    refreshLayout.spotlightView?.endSpotlight()
+                }, 1000)
+            }, 1000)
+        }
         return root
     }
 
@@ -44,51 +61,48 @@ class MainFragment : Fragment() {
         builder = SpotlightBuilder(requireContext())
             .setTargetView(center)
             .setInset(20)
-            .setTitle("Center")
-            .setDescription("This is the center text")
+            .setTitle("TAP")
+            .setDescription("on the text")
+            .setDismissType(SpotlightDismissType.targetView)
             .setListener(object : SpotlightListener {
-                    override fun onEnd(targetView: View?) {
+                override fun onEnd(targetView: View?) {
                     when (targetView) {
                         center -> {
                             builder
-                                .setTitle("Bottom Right")
-                                .setDescription("This is the bottom right text")
                                 .setTargetView(bottomRight)
                         }
                         bottomRight -> {
                             builder
-                                .setTitle("Bottom Left")
-                                .setDescription("This is the bottom left text")
                                 .setTargetView(bottomLeft)
                         }
                         bottomLeft -> {
                             builder
-                                .setTitle("Top Left")
-                                .setDescription("This is the top left text")
                                 .setTargetView(topLeft)
                         }
                         topLeft -> {
                             builder
-                                .setTitle("Top Right")
-                                .setDescription("This is the top right text")
                                 .setTargetView(topRight)
                         }
                         topRight -> {
                             builder
-                                .setTitle("Left Container")
-                                .setDescription("This is the a large left view")
+                                .setTitle("PULL DOWN")
+                                .setDescription("to refresh the value")
+                                .setMessageLayout(R.layout.spotlight_skippable_message_view)
                                 .setTargetView(leftContainer)
                         }
                         leftContainer -> {
                             builder
-                                .setTitle("Right Container")
-                                .setDescription("This is the a large right view")
+                                .setMessageLayout(com.matadesigns.spotlight.R.layout.simple_message)
+                                .setDismissType(SpotlightDismissType.anywhere)
+                                .setTitle("TAP")
+                                .setDescription("anywhere")
                                 .setTargetView(rightContainer)
                         }
                         rightContainer -> {
                             builder
-                                .setTitle("Center")
-                                .setDescription("This is the center text")
+                                .setDismissType(SpotlightDismissType.targetView)
+                                .setTitle("TAP")
+                                .setDescription("on the text")
                                 .setTargetView(center)
                         }
                     }

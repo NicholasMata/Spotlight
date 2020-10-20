@@ -4,5 +4,6 @@ import com.matadesigns.spotlight.SpotlightView
 import com.matadesigns.spotlight.config.SpotlightMessageGravity
 
 interface SpotlightMessage {
-    var spotlightGravity: SpotlightMessageGravity
+    var spotlightGravity: SpotlightMessageGravity?
+    var spotlightView: SpotlightView?
 }

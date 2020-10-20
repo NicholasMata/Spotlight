@@ -6,6 +6,7 @@ import android.util.Size
 import android.view.View
 import android.view.View.MeasureSpec
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import com.matadesigns.spotlight.SpotlightView
 import com.matadesigns.spotlight.abstraction.SpotlightLayoutManager
@@ -64,34 +65,26 @@ class DefaultLayoutManager : SpotlightLayoutManager {
         rect: Rect,
         messageGravity: SpotlightMessageGravity
     ): Size {
-        val heightMinusNavigation = parent.bottom - getNavigationBarSize(view)
+        val height = parent.bottom
         val width = parent.width()
         return when (messageGravity) {
             SpotlightMessageGravity.bottom -> Size(
                 width,
-                heightMinusNavigation - rect.bottom
+                height - rect.bottom
             )
             SpotlightMessageGravity.left -> Size(
                 rect.left - parent.left,
-                heightMinusNavigation
+                height
             )
             SpotlightMessageGravity.right -> Size(
                 parent.right - rect.right,
-                heightMinusNavigation
+                height
             )
             SpotlightMessageGravity.top -> Size(
                 width,
                 rect.top - parent.top
             )
         }
-    }
-
-    private fun getNavigationBarSize(root: View): Int {
-        val resources = root.context.resources
-        val resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android")
-        return if (resourceId > 0) {
-            resources.getDimensionPixelSize(resourceId)
-        } else 0
     }
 
     override fun gravityFor(
@@ -169,7 +162,7 @@ class DefaultLayoutManager : SpotlightLayoutManager {
             message.measure(widthMeasureSpec, heightMeasureSpec)
             messageWidth = message.measuredWidth
             messageHeight = message.measuredHeight
-            if (originalMessageHeight != messageHeight && originalMessageWidth != messageWidth) {
+            if (originalMessageHeight != messageHeight || originalMessageWidth != messageWidth) {
                 val layoutParams = message.layoutParams
                 layoutParams.width = messageWidth
                 layoutParams.height = messageHeight
@@ -361,15 +354,21 @@ class DefaultLayoutManager : SpotlightLayoutManager {
 
         repositionInside(rootRect, messageRect)
 
-        indicator.left = indicatorRect.left
-        indicator.right = indicatorRect.right
-        indicator.top = indicatorRect.top
-        indicator.bottom = indicatorRect.bottom
+        indicator.x = indicatorRect.left.toFloat()
+        indicator.y = indicatorRect.top.toFloat()
+        val indicatorWidth = indicatorRect.width()
+        val indicatorHeight = indicatorRect.height()
+        val indicatorLayoutParams = indicator.layoutParams
+        if (indicatorLayoutParams.width != indicatorWidth ||
+            indicatorLayoutParams.height != indicatorHeight
+        ) {
+            indicatorLayoutParams.width = indicatorWidth
+            indicatorLayoutParams.height = indicatorHeight
+            indicator.layoutParams = indicatorLayoutParams
+        }
 
-        message.left = messageRect.left
-        message.right = messageRect.right
-        message.top = messageRect.top
-        message.bottom = messageRect.bottom
+        message.x = messageRect.left.toFloat()
+        message.y = messageRect.top.toFloat()
     }
 
     private fun repositionInside(parent: Rect, child: Rect) {

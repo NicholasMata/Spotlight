@@ -8,7 +8,7 @@
     tools:context=".ui.main.MainFragment">
 
 
-    <View
+    <com.matadesigns.spotlightandroid.ui.main.CustomSwipeRefreshLayout
         android:id="@+id/left_container"
         android:layout_width="100dp"
         android:layout_height="0dp"
@@ -18,15 +18,33 @@
         android:background="@android:color/holo_green_dark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" >
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center">
+                <TextView
+                    android:id="@+id/left_container_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:text="1"/>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+    </com.matadesigns.spotlightandroid.ui.main.CustomSwipeRefreshLayout>
 
     <View
         android:id="@+id/right_container"
         android:layout_width="230dp"
         android:layout_height="0dp"
         android:layout_marginTop="60dp"
-        android:layout_marginBottom="60dp"
         android:layout_marginEnd="20dp"
+        android:layout_marginBottom="60dp"
         android:background="@android:color/holo_green_dark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -37,6 +55,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
+        android:textColor="@android:color/white"
         android:text="CENTER"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

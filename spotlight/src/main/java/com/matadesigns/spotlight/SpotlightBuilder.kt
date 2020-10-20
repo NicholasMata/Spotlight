@@ -50,11 +50,11 @@ open class SpotlightBuilder(private var context: Context) {
 
     fun setMessageGravity(messageGravity: SpotlightMessageGravity?): SpotlightBuilder {
         this._messageGravity = messageGravity
-        return this;
+        return this
     }
 
     fun setTargetView(view: View?): SpotlightBuilder {
-        this._targetView = view;
+        this._targetView = view
         return this
     }
 
@@ -81,6 +81,7 @@ open class SpotlightBuilder(private var context: Context) {
     fun build(): SpotlightView {
         return SpotlightView(context).also {
             it.dismissType = this._dismissType
+            it.styler = this._styler
             it.listener = this._listener
             it.indicatorLayout = this._indicatorLayout
             it.messageLayout = this._messageLayout
@@ -90,9 +91,8 @@ open class SpotlightBuilder(private var context: Context) {
             it.insetTop = this._insetTop
             it.insetLeft = this._insetLeft
             it.insetRight = this._insetRight
-            it.setTitle(this._title)
-            it.setDescription(this._description)
-            it.styler = _styler
+            it.title = this._title
+            it.description = this._description
         }
     }
 }

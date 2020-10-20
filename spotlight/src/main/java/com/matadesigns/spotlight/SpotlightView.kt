@@ -33,13 +33,19 @@ open class SpotlightView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    protected var _backgroundPaint = Paint()
-    protected var _targetPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    protected var _targetRect = Rect()
-    protected var _thisRect = Rect()
+    var backgroundPaint = Paint()
+        protected set
+    var targetPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        protected set
+    var targetRect = Rect()
+        protected set
+    var thisRect = Rect()
+        protected set
 
-    protected var messageView: View
-    protected var indicatorView: View
+    var messageView: View
+        protected set
+    var indicatorView: View
+        protected set
 
     var insetTop: Int = 0
     var insetBottom: Int = 0
@@ -113,7 +119,7 @@ open class SpotlightView @JvmOverloads constructor(
         it.fillAfter = true
     }
 
-    var startAnimationListener: Animation.AnimationListener
+    private var startAnimationListener: Animation.AnimationListener
 
     init {
         setWillNotDraw(false)
@@ -169,7 +175,7 @@ open class SpotlightView @JvmOverloads constructor(
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        _thisRect.set(
+        thisRect.set(
             left,
             top,
             right,
@@ -182,15 +188,15 @@ open class SpotlightView @JvmOverloads constructor(
         super.onDraw(canvas)
         val targetView = targetView
         if (targetView != null) {
-            styler.styleBackground(_backgroundPaint)
-            canvas?.drawRect(_thisRect, _backgroundPaint)
+            styler.styleBackground(backgroundPaint)
+            canvas?.drawRect(thisRect, backgroundPaint)
 
-            styler.styleTarget(_targetPaint)
+            styler.styleTarget(targetPaint)
             if (targetView is SpotlightTarget) {
                 val targetPath = targetView.spotlightPath
-                canvas?.drawPath(targetPath, _targetPaint)
+                canvas?.drawPath(targetPath, targetPaint)
             } else {
-                canvas?.drawRect(_targetRect, _targetPaint)
+                canvas?.drawRect(targetRect, targetPaint)
             }
         }
     }
@@ -224,12 +230,12 @@ open class SpotlightView @JvmOverloads constructor(
         if (targetView != null) {
             if (targetView is SpotlightTarget) {
                 val boundingRect = targetView.boundingRect.toRect()
-                _targetRect.set(boundingRect)
+                targetRect.set(boundingRect)
             } else {
                 val point = SpotlightMath.pointOnScreen(targetView)
                 val left = point.x
                 val top = point.y
-                _targetRect.set(
+                targetRect.set(
                     left,
                     top,
                     left + targetView.width,
@@ -238,7 +244,7 @@ open class SpotlightView @JvmOverloads constructor(
             }
             postInvalidate()
         } else {
-            _targetRect.set(0, 0, 0, 0)
+            targetRect.set(0, 0, 0, 0)
         }
     }
 
@@ -246,19 +252,19 @@ open class SpotlightView @JvmOverloads constructor(
         setTargetViewPosition()
         val messageGravity =
             this.messageGravity ?: layoutManager.gravityFor(
-                _targetRect,
+                targetRect,
                 messageView,
-                _thisRect,
+                thisRect,
                 this
             )
         (indicatorView as? SpotlightIndicator)?.spotlightGravity = messageGravity
         (indicatorView as? SpotlightMessage)?.spotlightGravity = messageGravity
         layoutManager.layoutViews(
             messageGravity,
-            _targetRect,
+            targetRect,
             indicatorView,
             messageView,
-            _thisRect,
+            thisRect,
             this
         )
     }

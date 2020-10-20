@@ -162,13 +162,6 @@ class DefaultLayoutManager : SpotlightLayoutManager {
             message.measure(widthMeasureSpec, heightMeasureSpec)
             messageWidth = message.measuredWidth
             messageHeight = message.measuredHeight
-            if (originalMessageHeight != messageHeight || originalMessageWidth != messageWidth) {
-                val layoutParams = message.layoutParams
-                layoutParams.width = messageWidth
-                layoutParams.height = messageHeight
-                message.layoutParams = layoutParams
-                return
-            }
         } else {
             messageHeight = originalMessageHeight
             messageWidth = originalMessageWidth
@@ -354,21 +347,9 @@ class DefaultLayoutManager : SpotlightLayoutManager {
 
         repositionInside(rootRect, messageRect)
 
-        indicator.x = indicatorRect.left.toFloat()
-        indicator.y = indicatorRect.top.toFloat()
-        val indicatorWidth = indicatorRect.width()
-        val indicatorHeight = indicatorRect.height()
-        val indicatorLayoutParams = indicator.layoutParams
-        if (indicatorLayoutParams.width != indicatorWidth ||
-            indicatorLayoutParams.height != indicatorHeight
-        ) {
-            indicatorLayoutParams.width = indicatorWidth
-            indicatorLayoutParams.height = indicatorHeight
-            indicator.layoutParams = indicatorLayoutParams
-        }
+        indicator.layout(indicatorRect.left,indicatorRect.top,indicatorRect.right,indicatorRect.bottom)
 
-        message.x = messageRect.left.toFloat()
-        message.y = messageRect.top.toFloat()
+        message.layout(messageRect.left,messageRect.top,messageRect.right,messageRect.bottom)
     }
 
     private fun repositionInside(parent: Rect, child: Rect) {

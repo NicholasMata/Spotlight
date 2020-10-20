@@ -98,13 +98,6 @@ open class SimpleIndicatorView @JvmOverloads constructor(
         _innerDotPaint.isAntiAlias = true
     }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-        val start = getLineStart()
-        _start.set(start)
-        _end.set(start)
-    }
-
     override fun startAnimation() {
         val start = getLineStart()
         _start.set(start)
@@ -118,19 +111,18 @@ open class SimpleIndicatorView @JvmOverloads constructor(
             _dotInnerRadius = animatedValue
             postInvalidate()
         }
-        val lineAnimator: ValueAnimator
-        when (spotlightGravity) {
+        val lineAnimator = when (spotlightGravity) {
             SpotlightMessageGravity.right -> {
-                lineAnimator = ValueAnimator.ofFloat(_end.x, actualEnd.x + dotDiameter)
+                ValueAnimator.ofFloat(_end.x, actualEnd.x + dotDiameter)
             }
             SpotlightMessageGravity.left -> {
-                lineAnimator = ValueAnimator.ofFloat(_end.x, actualEnd.x - dotDiameter)
+                ValueAnimator.ofFloat(_end.x, actualEnd.x - dotDiameter)
             }
             SpotlightMessageGravity.bottom -> {
-                lineAnimator = ValueAnimator.ofFloat(_end.y, actualEnd.y + dotDiameter)
+                ValueAnimator.ofFloat(_end.y, actualEnd.y + dotDiameter)
             }
             SpotlightMessageGravity.top -> {
-                lineAnimator = ValueAnimator.ofFloat(_end.y, actualEnd.y - dotDiameter)
+                ValueAnimator.ofFloat(_end.y, actualEnd.y - dotDiameter)
             }
         }
 

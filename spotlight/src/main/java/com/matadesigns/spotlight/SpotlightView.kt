@@ -21,10 +21,6 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.core.graphics.toRect
-import androidx.core.view.marginBottom
-import androidx.core.view.marginEnd
-import androidx.core.view.marginStart
-import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
 import com.matadesigns.spotlight.abstraction.*
 import com.matadesigns.spotlight.config.SpotlightDismissType
@@ -173,7 +169,6 @@ open class SpotlightView @JvmOverloads constructor(
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        super.onLayout(changed, left, top, right, bottom)
         _thisRect.set(
             left,
             top,
@@ -181,17 +176,6 @@ open class SpotlightView @JvmOverloads constructor(
             bottom
         )
         layoutViews()
-    }
-
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-        _thisRect.set(
-            _thisRect.left,
-            _thisRect.top,
-            _thisRect.left + w,
-            _thisRect.top + h
-        )
-        postInvalidate()
     }
 
     override fun onDraw(canvas: Canvas?) {

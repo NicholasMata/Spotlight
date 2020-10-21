@@ -21,6 +21,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.core.graphics.toRect
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import com.matadesigns.spotlight.abstraction.*
 import com.matadesigns.spotlight.config.SpotlightDismissType
@@ -201,17 +202,23 @@ open class SpotlightView @JvmOverloads constructor(
         }
     }
 
-    fun startSpotlight() {
+    fun startSpotlight(viewGroup: ViewGroup? = null) {
         layoutViews()
 
-        isClickable = false
-        val context = this.context
-        when (context) {
-            is Activity -> {
-                (context.window.decorView as? ViewGroup)?.addView(this)
-            }
-            is Fragment -> {
-                (context.activity?.window?.decorView as? ViewGroup)?.addView(this)
+        if(viewGroup != null) {
+            viewGroup.addView(this)
+        } else {
+            val context = this.context
+            when (context) {
+                is Activity -> {
+                    (context.window.decorView as? ViewGroup)?.addView(this)
+                }
+                is DialogFragment -> {
+                    (context.dialog?.window?.decorView as? ViewGroup)?.addView(this)
+                }
+                is Fragment -> {
+                    (context.activity?.window?.decorView as? ViewGroup)?.addView(this)
+                }
             }
         }
         this.startAnimation(startAnimation)
@@ -221,7 +228,7 @@ open class SpotlightView @JvmOverloads constructor(
     fun endSpotlight() {
         (messageView as? SpotlightMessage)?.spotlightView = null
         (targetView as? SpotlightTarget)?.spotlightView = null
-        ((context as? Activity)?.window?.decorView as? ViewGroup)?.removeView(this)
+        (parent as? ViewGroup)?.removeView(this)
         listener?.onEnd(targetView)
     }
 

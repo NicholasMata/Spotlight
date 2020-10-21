@@ -58,7 +58,11 @@ class MainFragment : Fragment() {
         val leftContainer = requireView().findViewById<View>(R.id.left_container)
         val rightContainer = requireView().findViewById<View>(R.id.right_container)
 
+        val tapGestureOverlayView = GestureOverlayView(requireContext())
+        val pullDownGestureOverlayView = GestureOverlayView(requireContext())
+        pullDownGestureOverlayView.gestureType = GestureType.pullDown
         builder = SpotlightBuilder(requireContext())
+            .addView(tapGestureOverlayView)
             .setTargetView(center)
             .setInset(20)
             .setTitle("TAP")
@@ -85,6 +89,8 @@ class MainFragment : Fragment() {
                         }
                         topRight -> {
                             builder
+                                .removeView(tapGestureOverlayView)
+                                .addView(pullDownGestureOverlayView)
                                 .setTitle("PULL DOWN")
                                 .setDescription("to refresh the value")
                                 .setMessageLayout(R.layout.spotlight_skippable_message_view)
@@ -92,6 +98,8 @@ class MainFragment : Fragment() {
                         }
                         leftContainer -> {
                             builder
+                                .removeView(pullDownGestureOverlayView)
+                                .addView(tapGestureOverlayView)
                                 .setMessageLayout(com.matadesigns.spotlight.R.layout.simple_message)
                                 .setDismissType(SpotlightDismissType.anywhere)
                                 .setTitle("TAP")

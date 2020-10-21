@@ -21,6 +21,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.core.graphics.toRect
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.matadesigns.spotlight.abstraction.*
 import com.matadesigns.spotlight.config.SpotlightDismissType
@@ -122,6 +123,7 @@ open class SpotlightView @JvmOverloads constructor(
     private var startAnimationListener: Animation.AnimationListener
 
     init {
+        clipChildren = false
         setWillNotDraw(false)
         setLayerType(LAYER_TYPE_HARDWARE, null)
 
@@ -144,8 +146,11 @@ open class SpotlightView @JvmOverloads constructor(
             override fun onAnimationStart(animation: Animation?) {}
 
             override fun onAnimationEnd(animation: Animation?) {
-                (this@SpotlightView.messageView as? SpotlightAnimatable)?.startAnimation()
-                (this@SpotlightView.indicatorView as? SpotlightAnimatable)?.startAnimation()
+                this@SpotlightView.children.forEach {
+                    if (it is SpotlightAnimatable) {
+                        it.startAnimation()
+                    }
+                }
             }
 
             override fun onAnimationRepeat(animation: Animation?) {}
@@ -219,13 +224,19 @@ open class SpotlightView @JvmOverloads constructor(
     }
 
     fun endSpotlight() {
-        (messageView as? SpotlightMessage)?.spotlightView = null
-        (targetView as? SpotlightTarget)?.spotlightView = null
+        children.forEach {
+            when(it){
+                is SpotlightAnimatable -> it.endAnimation()
+                is SpotlightMessage -> it.spotlightView = null
+                is SpotlightTarget -> it.spotlightView = null
+            }
+        }
+        removeAllViews()
         ((context as? Activity)?.window?.decorView as? ViewGroup)?.removeView(this)
         listener?.onEnd(targetView)
     }
 
-    fun setTargetViewPosition() {
+    protected fun setTargetViewPosition() {
         val targetView = targetView
         if (targetView != null) {
             if (targetView is SpotlightTarget) {
@@ -242,10 +253,10 @@ open class SpotlightView @JvmOverloads constructor(
                     top + targetView.height
                 )
             }
-            postInvalidate()
         } else {
             targetRect.set(0, 0, 0, 0)
         }
+        postInvalidate()
     }
 
     protected fun layoutViews() {

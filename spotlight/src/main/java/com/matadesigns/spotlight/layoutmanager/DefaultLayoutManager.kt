@@ -8,8 +8,10 @@ import android.view.View.MeasureSpec
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import androidx.core.view.children
 import com.matadesigns.spotlight.SpotlightView
 import com.matadesigns.spotlight.abstraction.SpotlightLayoutManager
+import com.matadesigns.spotlight.abstraction.SpotlightTargetOverlay
 import com.matadesigns.spotlight.config.SpotlightMessageGravity
 
 
@@ -127,6 +129,12 @@ class DefaultLayoutManager : SpotlightLayoutManager {
             parentRect.right - root.insetRight,
             parentRect.bottom - root.insetBottom
         )
+
+        root.children.forEach {
+            if(it is SpotlightTargetOverlay) {
+                it.layout(targetRect.left, targetRect.top, targetRect.right, targetRect.bottom)
+            }
+        }
 
         if (rootRect.width() <= 0 && rootRect.height() <= 0) return
 

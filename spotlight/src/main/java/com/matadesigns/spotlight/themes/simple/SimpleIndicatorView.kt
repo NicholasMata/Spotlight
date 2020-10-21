@@ -20,6 +20,7 @@ open class SimpleIndicatorView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr), SpotlightIndicator, SpotlightAnimatable {
 
+    val animators = mutableListOf<Animator>()
     protected val _start = PointF()
     protected val _end = PointF()
     protected var _dotOuterRadius = 0f
@@ -98,6 +99,13 @@ open class SimpleIndicatorView @JvmOverloads constructor(
         _innerDotPaint.isAntiAlias = true
     }
 
+    override fun endAnimation() {
+        animators.forEach {
+            it.cancel()
+        }
+        animators.clear()
+    }
+
     override fun startAnimation() {
         val start = getLineStart()
         _start.set(start)
@@ -139,8 +147,6 @@ open class SimpleIndicatorView @JvmOverloads constructor(
         }
 
         lineAnimator.duration = lineAnimationDuration
-        lineAnimator.start()
-
         lineAnimator.addListener(object : Animator.AnimatorListener {
             override fun onAnimationStart(animator: Animator) {}
             override fun onAnimationEnd(animator: Animator) {
@@ -151,6 +157,11 @@ open class SimpleIndicatorView @JvmOverloads constructor(
             override fun onAnimationCancel(animator: Animator) {}
             override fun onAnimationRepeat(animator: Animator) {}
         })
+
+        lineAnimator.start()
+
+        animators.add(dotAnimator)
+        animators.add(lineAnimator)
     }
 
     fun getLineEnd(): PointF {

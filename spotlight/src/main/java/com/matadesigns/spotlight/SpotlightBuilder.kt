@@ -3,8 +3,10 @@ package com.matadesigns.spotlight
 import android.content.Context
 import android.view.View
 import androidx.annotation.LayoutRes
+import androidx.core.view.children
 import com.matadesigns.spotlight.abstraction.SpotlightListener
 import com.matadesigns.spotlight.abstraction.SpotlightStyler
+import com.matadesigns.spotlight.abstraction.SpotlightTargetOverlay
 import com.matadesigns.spotlight.config.SpotlightDismissType
 import com.matadesigns.spotlight.config.SpotlightMessageGravity
 import com.matadesigns.spotlight.themes.simple.SimpleStyler
@@ -23,6 +25,18 @@ open class SpotlightBuilder(private var context: Context) {
     private var _title: CharSequence = ""
     private var _description: CharSequence = ""
     private var _styler: SpotlightStyler = SimpleStyler(context)
+
+    private var children = mutableListOf<View>()
+
+    fun addView(view: View): SpotlightBuilder {
+        children.add(view)
+        return this
+    }
+
+    fun removeView(view: View): SpotlightBuilder {
+        children.remove(view)
+        return this
+    }
 
     fun setTitle(text: CharSequence): SpotlightBuilder {
         _title = text
@@ -93,6 +107,9 @@ open class SpotlightBuilder(private var context: Context) {
             it.insetRight = this._insetRight
             it.title = this._title
             it.description = this._description
+            children.forEach { v ->
+                it.addView(v)
+            }
         }
     }
 }

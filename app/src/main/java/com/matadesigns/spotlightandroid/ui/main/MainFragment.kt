@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -14,8 +15,10 @@ import com.matadesigns.spotlight.SpotlightBuilder
 import com.matadesigns.spotlight.abstraction.SpotlightListener
 import com.matadesigns.spotlight.config.SpotlightDismissType
 import com.matadesigns.spotlight.config.SpotlightMessageGravity
+import com.matadesigns.spotlightandroid.MainActivity
 import com.matadesigns.spotlightandroid.R
 import kotlinx.android.synthetic.main.main_fragment.view.*
+import com.matadesigns.spotlight.utils.*
 
 class MainFragment : Fragment() {
 
@@ -82,9 +85,11 @@ class MainFragment : Fragment() {
                         topLeft -> {
                             builder
                                 .setTargetView(topRight)
+                                .setPassThrough(true)
                         }
                         topRight -> {
                             builder
+                                .setPassThrough(false)
                                 .setTitle("PULL DOWN")
                                 .setDescription("to refresh the value")
                                 .setMessageLayout(R.layout.spotlight_skippable_message_view)
@@ -106,7 +111,7 @@ class MainFragment : Fragment() {
                                 .setTargetView(center)
                         }
                     }
-                    builder.build().startSpotlight()
+                    builder.build().startSpotlight(animate = false)
                 }
 
                 override fun onStart(targetView: View?) {
@@ -121,7 +126,11 @@ class MainFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
-        // TODO: Use the ViewModel
+        requireView().message_top_right.isClickable = true
+        requireView().message_top_right.setOnClickListenerWithDebounce({
+            Log.i("DebounceOnClickListener", "Clicked")
+            builder.current?.endSpotlight()
+        })
     }
 
 }

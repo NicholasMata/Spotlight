@@ -23,6 +23,9 @@ open class SpotlightBuilder(private var context: Context) {
     private var _title: CharSequence = ""
     private var _description: CharSequence = ""
     private var _styler: SpotlightStyler = SimpleStyler(context)
+    private var _passThrough = false
+    public var current: SpotlightView? = null
+        private set
 
     fun setTitle(text: CharSequence): SpotlightBuilder {
         _title = text
@@ -36,6 +39,11 @@ open class SpotlightBuilder(private var context: Context) {
 
     fun setStyler(styler: SpotlightStyler): SpotlightBuilder {
         _styler = styler
+        return this
+    }
+
+    fun setPassThrough(passThrough: Boolean): SpotlightBuilder {
+        _passThrough = passThrough
         return this
     }
 
@@ -79,7 +87,8 @@ open class SpotlightBuilder(private var context: Context) {
     }
 
     fun build(): SpotlightView {
-        return SpotlightView(context).also {
+        val current = SpotlightView(context).also {
+            it.passThrough = this._passThrough
             it.dismissType = this._dismissType
             it.styler = this._styler
             it.listener = this._listener
@@ -94,5 +103,7 @@ open class SpotlightBuilder(private var context: Context) {
             it.title = this._title
             it.description = this._description
         }
+        this.current = current
+        return current
     }
 }

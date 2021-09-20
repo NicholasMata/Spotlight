@@ -21,6 +21,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.core.graphics.toRect
+import androidx.core.graphics.toRectF
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import com.matadesigns.spotlight.abstraction.*
@@ -33,7 +34,6 @@ import com.matadesigns.spotlight.utils.SpotlightMath
 open class SpotlightView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
-
     var backgroundPaint = Paint()
         protected set
     var targetPaint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -115,6 +115,7 @@ open class SpotlightView @JvmOverloads constructor(
         }
     var listener: SpotlightListener? = null
     var dismissType: SpotlightDismissType = SpotlightDismissType.targetView
+    var passThrough = false
     var startAnimation: Animation = AlphaAnimation(0.0f, 1.0f).also {
         it.duration = 400
         it.fillAfter = true
@@ -202,10 +203,10 @@ open class SpotlightView @JvmOverloads constructor(
         }
     }
 
-    fun startSpotlight(viewGroup: ViewGroup? = null) {
+    fun startSpotlight(viewGroup: ViewGroup? = null, animate: Boolean = true) {
         layoutViews()
 
-        if(viewGroup != null) {
+        if (viewGroup != null) {
             viewGroup.addView(this)
         } else {
             val context = this.context
@@ -221,15 +222,18 @@ open class SpotlightView @JvmOverloads constructor(
                 }
             }
         }
+        if (!animate) {
+            startAnimation.duration = 0
+        }
         this.startAnimation(startAnimation)
         listener?.onStart(targetView)
     }
 
     fun endSpotlight() {
+        listener?.onEnd(targetView)
         (messageView as? SpotlightMessage)?.spotlightView = null
         (targetView as? SpotlightTarget)?.spotlightView = null
         (parent as? ViewGroup)?.removeView(this)
-        listener?.onEnd(targetView)
     }
 
     fun setTargetViewPosition() {
@@ -283,6 +287,12 @@ open class SpotlightView @JvmOverloads constructor(
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event == null) return false
+
+        if (passThrough && dismissType == SpotlightDismissType.targetView) {
+            val isInsideTarget = targetRect.toRectF().contains(event.x, event.y)
+            return !isInsideTarget
+        }
+
         val x = event.x
         val y = event.y
         val targetView = targetView
